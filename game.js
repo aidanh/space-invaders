@@ -3,6 +3,8 @@ class Game {
         this.isMobile = window.innerWidth <= 768;
         this.soundsInitialized = false;
         this.setupSounds();
+        this.touchStartX = null;
+        this.touchStartY = null;
         // Add click handler to initialize sounds (browser requirement)
         document.addEventListener('click', () => {
             if (!this.soundsInitialized) {
@@ -723,8 +725,57 @@ class UFO {
 // Start the game when the page loads
 window.addEventListener('load', () => {
     // Prevent default touch behaviors
-    document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-    document.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        const game = window.gameInstance;
+
+    document.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        game.touchStartX = e.touches[0].clientX;
+        game.touchStartY = e.touches[0].clientY;
+    }, { passive: false });
+
+    document.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if (!game.touchStartX || !game.touchStartY) return;
+
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const deltaX = touchEndX - game.touchStartX;
+        const deltaY = touchEndY - game.touchStartY;
+
+        // If it's a short touch with minimal movement, treat it as a tap (shoot)
+        if (Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) {
+            game.player.shoot();
+        } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Horizontal swipe
+            if (deltaX > 50) {
+                // Swipe right
+                game.player.moveRight(game.canvas.width);
+            } else if (deltaX < -50) {
+                // Swipe left
+                game.player.moveLeft();
+            }
+        }
+
+        game.touchStartX = null;
+        game.touchStartY = null;
+    }, { passive: false });
+
+    document.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!game.touchStartX) return;
+
+        const touchX = e.touches[0].clientX;
+        const deltaX = touchX - game.touchStartX;
+
+        // Update player position based on touch movement
+        if (deltaX > 0) {
+            game.player.moveRight(game.canvas.width);
+        } else if (deltaX < 0) {
+            game.player.moveLeft();
+        }
+
+        game.touchStartX = touchX;
+    }, { passive: false });
     
     // Handle orientation changes
     window.addEventListener('resize', () => {
