@@ -191,14 +191,11 @@ class Game {
     }
 
     setupInputs() {
-        // Touch controls
-        const leftButton = document.getElementById('leftButton');
-        const rightButton = document.getElementById('rightButton');
-        const shootButton = document.getElementById('shootButton');
-        
-        // Handle touch events
+        // Touch controls for mobile
         if (this.isMobile) {
-            const handleTouchStart = (e) => {
+            let lastTapTime = 0;
+            
+            this.canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault(); // Prevent scrolling
             };
             
@@ -487,6 +484,14 @@ class Game {
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
+        // Draw title in top right corner on mobile
+        if (this.isMobile) {
+            this.ctx.fillStyle = '#33ff33';
+            this.ctx.font = '12px "Press Start 2P"';
+            this.ctx.textAlign = 'right';
+            this.ctx.fillText('SPACE INVADERS', this.canvas.width - 10, 20);
+        }
+        
         this.barriers.forEach(barrier => barrier.draw(this.ctx));
         this.player.draw(this.ctx);
         this.bullets.forEach(bullet => bullet.draw(this.ctx));
@@ -522,28 +527,19 @@ class Game {
     }
     
     resizeCanvas() {
-        const aspectRatio = 4/3;
         this.isMobile = window.innerWidth <= 768;
 
         if (this.isMobile) {
-            // On mobile, make the game take up most of the screen while maintaining aspect ratio
-            const maxWidth = window.innerWidth * 0.95;
-            const maxHeight = window.innerHeight * 0.7; // Leave room for controls
-
-            if (maxWidth / aspectRatio <= maxHeight) {
-                this.canvas.width = maxWidth;
-                this.canvas.height = maxWidth / aspectRatio;
-            } else {
-                this.canvas.height = maxHeight;
-                this.canvas.width = maxHeight * aspectRatio;
-            }
+            // Use full screen width and height on mobile
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
         } else {
             this.canvas.width = 800;
             this.canvas.height = 600;
         }
 
         // Scale game objects based on canvas size
-        const scale = this.canvas.width / 800; // Base scale on original width
+        const scale = Math.min(this.canvas.width / 800, this.canvas.height / 600);
         if (this.player) {
             this.player.width = 50 * scale;
             this.player.height = 30 * scale;
@@ -553,6 +549,15 @@ class Game {
         // Clear the canvas
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Update title position
+        if (this.isMobile) {
+            this.titleX = this.canvas.width - 120;
+            this.titleY = 30;
+        } else {
+            this.titleX = this.canvas.width / 2;
+            this.titleY = 30;
+        }
     }
 
     gameLoop(timestamp = 0) {
@@ -744,9 +749,9 @@ class Bullet {
         this.y = y;
         this.width = 4;
         this.height = 15;
-        this.speed = 12; // Increased from 7 to 12
+        this.speed = 12;
         this.direction = direction; // -1 for up, 1 for down
-        this.damage = direction === 1 ? 0.5 : 1; // Alien bullets do less damage
+        this.damage = direction === 1 ? 1.5 : 2; // Increased damage for both player and alien bullets
     }
     
     update() {
@@ -803,7 +808,7 @@ class Barrier {
                         y: this.y + row * blockSize,
                         width: blockSize,
                         height: blockSize,
-                        health: 2 // Increased initial health
+                        health: 1.5 // Reduced initial health
                     });
                 }
             }
