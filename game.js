@@ -126,24 +126,42 @@ class Game {
                 if (this.ufoSound) {
                     this.ufoSound.stop();
                 }
+
+                // Create oscillator for the main tone
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
+                const lfo = audioContext.createOscillator(); // For frequency modulation
+                const lfoGain = audioContext.createGain();
+                
+                // Connect LFO to oscillator frequency
+                lfo.connect(lfoGain);
+                lfoGain.connect(oscillator.frequency);
+                
+                // Connect main oscillator to output
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
                 
-                oscillator.type = 'square';
+                // Set up the main oscillator
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
                 gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
                 
-                // UFO sound pattern
-                const frequencies = [480, 640, 480, 320];
-                let time = audioContext.currentTime;
-                frequencies.forEach(freq => {
-                    oscillator.frequency.setValueAtTime(freq, time);
-                    time += 0.15;
-                });
+                // Set up the LFO for the "woo woo" effect
+                lfo.type = 'sine';
+                lfo.frequency.setValueAtTime(2, audioContext.currentTime); // Speed of the "woo"
+                lfoGain.gain.setValueAtTime(100, audioContext.currentTime); // Depth of the "woo"
                 
+                // Start both oscillators
+                lfo.start();
                 oscillator.start();
-                this.ufoSound = oscillator;
+                
+                // Store both oscillators to stop them later
+                this.ufoSound = {
+                    stop: () => {
+                        oscillator.stop();
+                        lfo.stop();
+                    }
+                };
             },
             ufoExplosion: () => {
                 if (this.ufoSound) {
