@@ -744,15 +744,21 @@ window.addEventListener('load', () => {
         mobileControls.classList.add('hidden');
     }
 
-    // Start button click handler
-    startButton.addEventListener('click', (e) => {
-        e.preventDefault();
+    // Prevent any button movement
+    ['mousedown', 'touchstart', 'click'].forEach(eventType => {
+        startButton.addEventListener(eventType, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (eventType === 'click') {
         startScreen.style.display = 'none';
         if (window.innerWidth <= 768) {
             mobileControls.classList.remove('hidden');
         }
-        window.gameInstance.gameStarted = true;
-        window.gameInstance.paused = false; // Unpause the game when start button is clicked
+                window.gameInstance.gameStarted = true;
+                window.gameInstance.paused = false; // Unpause the game when start button is clicked
+            }
+        }, { passive: false });
     });
 
     const game = window.gameInstance;
