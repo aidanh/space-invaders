@@ -80,10 +80,12 @@ body {
     overflow: hidden;
     pointer-events: auto;
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
+    touch-action: none;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .start-game-button:active,
