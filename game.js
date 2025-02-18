@@ -443,8 +443,32 @@ class Game {
         // Update bullets
         this.bullets = this.bullets.filter(bullet => {
             bullet.update();
-            return bullet.y > 0;
+            
+            // Check collision with aliens
+            let hitAlien = false;
+            this.aliens.forEach(alien => {
+                if (!alien.isExploding && this.checkCollision(bullet, alien)) {
+                    alien.explode();
+                    this.score += 100;
+                    this.updateScore();
+                    this.sounds.explosion();
+                    hitAlien = true;
+                }
+            });
+            
+            // Check collision with barriers
+            let hitBarrier = false;
+            this.barriers.forEach(barrier => {
+                if (!hitBarrier && barrier.checkCollision(bullet)) {
+                    hitBarrier = true;
+                }
+            });
+            
+            return !hitAlien && !hitBarrier && bullet.y > 0;
         });
+
+        // Remove dead aliens
+        this.aliens = this.aliens.filter(alien => !alien.isExploding || alien.particles.length > 0);
         
         // Update aliens
         this.alienMoveTimer += deltaTime;
@@ -453,13 +477,29 @@ class Game {
             
             let touchedEdge = false;
             this.aliens.forEach(alien => {
-                if (this.alienStepDown) {
-                    alien.y += 30;
-                } else {
-                    alien.x += 30 * this.alienDirection;
-                    if (alien.x <= 0 || alien.x + alien.width >= this.canvas.width) {
-                        touchedEdge = true;
+                if (!alien.isExploding) {
+                    if (this.alienStepDown) {
+                        alien.y += 30;
+                    } else {
+                        alien.x += 30 * this.alienDirection;
+                        if (alien.x <= 0 || alien.x + alien.width >= this.canvas.width) {
+                            touchedEdge = true;
+                        }
                     }
+
+                    // Check for collision with barriers
+                    this.barriers.forEach((barrier, barrierIndex) => {
+                        barrier.blocks.forEach((block, blockIndex) => {
+                            if (this.checkCollision(alien, block)) {
+                                // Remove the block
+                                barrier.blocks.splice(blockIndex, 1);
+                                // Remove the barrier if no blocks left
+                                if (barrier.blocks.length === 0) {
+                                    this.barriers.splice(barrierIndex, 1);
+                                }
+                            }
+                        });
+                    });
                 }
             });
             
@@ -479,15 +519,14 @@ class Game {
             let bulletHit = false;
             
             // Check collision with aliens
-            this.aliens = this.aliens.filter(alien => {
-                if (!bulletHit && this.checkCollision(bullet, alien)) {
+            this.aliens.forEach(alien => {
+                if (!bulletHit && !alien.isExploding && this.checkCollision(bullet, alien)) {
                     this.score += (3 - alien.type) * 100;
                     this.updateScore();
                     bulletHit = true;
+                    alien.explode();
                     this.sounds.explosion();
-                    return false;
                 }
-                return true;
             });
             
             // Check collision with UFO
@@ -726,9 +765,36 @@ class Alien {
         this.type = type % 3; // 0, 1, or 2 for different types
         this.width = 40;
         this.height = 40;
+        this.isExploding = false;
+        this.explosionTime = 0;
+        this.particles = [];
     }
     
     draw(ctx) {
+        if (this.isExploding) {
+            // Draw explosion particles
+            this.particles.forEach((particle, index) => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.vy += 0.2; // Gravity
+                particle.life -= 1;
+
+                if (particle.life > 0) {
+                    ctx.fillStyle = `rgba(51, 255, 51, ${particle.life / 50})`;
+                    ctx.fillRect(particle.x, particle.y, 2, 2);
+                }
+            });
+
+            // Remove dead particles
+            this.particles = this.particles.filter(p => p.life > 0);
+
+            // Check if explosion is complete
+            if (this.particles.length === 0) {
+                this.isExploding = false;
+            }
+            return;
+        }
+
         ctx.fillStyle = '#33ff33';
         
         if (this.type === 0) {
@@ -786,6 +852,27 @@ class Alien {
             
             // Eyes
             ctx.fillStyle = '#000';
+        }
+    }
+
+    explode() {
+        this.isExploding = true;
+        this.explosionTime = 0;
+        this.particles = [];
+
+        // Create explosion particles
+        for (let i = 0; i < 50; i++) {
+            const angle = (Math.random() * Math.PI * 2);
+            const speed = 2 + Math.random() * 3;
+            this.particles.push({
+                x: this.x + this.width/2,
+                y: this.y + this.height/2,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 30 + Math.random() * 20
+            });
+        }
+    }
             ctx.beginPath();
             ctx.arc(this.x + 15, this.y + 15, 3, 0, Math.PI * 2);
             ctx.arc(this.x + 25, this.y + 15, 3, 0, Math.PI * 2);
