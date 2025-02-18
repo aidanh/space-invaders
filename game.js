@@ -740,4 +740,3 @@ window.addEventListener('load', () => {
     window.gameInstance = 
     new Game();
 });
-});
