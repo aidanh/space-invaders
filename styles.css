@@ -1,0 +1,94 @@
+@keyframes flicker {
+    0% { opacity: 0.97; }
+    5% { opacity: 0.95; }
+    10% { opacity: 0.97; }
+    15% { opacity: 0.94; }
+    20% { opacity: 0.98; }
+    25% { opacity: 0.95; }
+    30% { opacity: 0.97; }
+    35% { opacity: 0.96; }
+    40% { opacity: 0.97; }
+    45% { opacity: 0.94; }
+    50% { opacity: 0.98; }
+    55% { opacity: 0.95; }
+    60% { opacity: 0.97; }
+    65% { opacity: 0.95; }
+    70% { opacity: 0.98; }
+    75% { opacity: 0.96; }
+    80% { opacity: 0.97; }
+    85% { opacity: 0.95; }
+    90% { opacity: 0.96; }
+    95% { opacity: 0.97; }
+    100% { opacity: 0.95; }
+}
+
+@keyframes scanline {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100vh); }
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #000;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+}
+
+.game-container {
+    position: relative;
+    animation: flicker 0.15s infinite;
+    box-shadow: 0 0 20px rgba(51, 255, 51, 0.4);
+}
+
+.game-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(rgba(51, 255, 51, 0.1) 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.game-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(transparent 0%, rgba(51, 255, 51, 0.2) 50%, transparent 100%);
+    animation: scanline 8s linear infinite;
+    pointer-events: none;
+    z-index: 2;
+}
+
+#gameCanvas {
+    border: 4px solid #33ff33;
+    background-color: #000;
+    border-radius: 20px;
+    filter: brightness(1.2) contrast(1.1);
+}
+
+.game-info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #33ff33;
+    font-size: 16px;
+    font-family: 'Press Start 2P', monospace;
+    text-shadow: 0 0 5px #33ff33;
+    z-index: 3;
+}
+
+.score, .lives {
+    margin: 5px;
+}
