@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Space Invaders</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
@@ -14,6 +14,13 @@
             <div class="score">Score: <span id="scoreValue">0</span></div>
             <div class="lives">Lives: <span id="livesValue">3</span></div>
         </div>
+    </div>
+    <div class="mobile-controls">
+        <div class="movement-buttons">
+            <button id="leftButton">←</button>
+            <button id="rightButton">→</button>
+        </div>
+        <button id="shootButton">FIRE</button>
     </div>
     <script src="game.js"></script>
 </body>

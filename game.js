@@ -1,5 +1,6 @@
 class Game {
     constructor() {
+        this.isMobile = window.innerWidth <= 768;
         this.soundsInitialized = false;
         this.setupSounds();
         // Add click handler to initialize sounds (browser requirement)
@@ -18,8 +19,16 @@ class Game {
         }, { once: true });
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
-        this.canvas.width = 800;
-        this.canvas.height = 600;
+        
+        // Set canvas size based on device
+        if (this.isMobile) {
+            const aspectRatio = 4/3;
+            this.canvas.width = Math.min(window.innerWidth, window.innerHeight * aspectRatio);
+            this.canvas.height = this.canvas.width / aspectRatio;
+        } else {
+            this.canvas.width = 800;
+            this.canvas.height = 600;
+        }
         
         this.player = new Player(this.canvas.width / 2, this.canvas.height - 30);
         this.bullets = [];
@@ -170,6 +179,40 @@ class Game {
     }
 
     setupInputs() {
+        // Touch controls
+        const leftButton = document.getElementById('leftButton');
+        const rightButton = document.getElementById('rightButton');
+        const shootButton = document.getElementById('shootButton');
+        
+        // Handle touch events
+        if (this.isMobile) {
+            const handleTouchStart = (e) => {
+                e.preventDefault(); // Prevent scrolling
+            };
+            
+            leftButton.addEventListener('touchstart', () => this.keys.left = true);
+            leftButton.addEventListener('touchend', () => this.keys.left = false);
+            rightButton.addEventListener('touchstart', () => this.keys.right = true);
+            rightButton.addEventListener('touchend', () => this.keys.right = false);
+            shootButton.addEventListener('touchstart', () => {
+                if (!this.keys.space && !this.gameOver) {
+                    this.bullets.push(new Bullet(
+                        this.player.x + this.player.width / 2,
+                        this.player.y,
+                        -1
+                    ));
+                    this.sounds.shoot();
+                }
+                this.keys.space = true;
+            });
+            shootButton.addEventListener('touchend', () => this.keys.space = false);
+            
+            // Prevent default touch behaviors
+            document.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchStart, { passive: false });
+        }
+        
+        // Keyboard controls
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') this.keys.left = true;
             if (e.key === 'ArrowRight') this.keys.right = true;
@@ -679,5 +722,22 @@ class UFO {
 
 // Start the game when the page loads
 window.addEventListener('load', () => {
+    // Prevent default touch behaviors
+    document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    document.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+    
+    // Handle orientation changes
+    window.addEventListener('resize', () => {
+        const game = window.gameInstance;
+        if (game && game.isMobile) {
+            const aspectRatio = 4/3;
+            game.canvas.width = Math.min(window.innerWidth, window.innerHeight * aspectRatio);
+            game.canvas.height = game.canvas.width / aspectRatio;
+        }
+    });
+    
+    // Store game instance globally for resize handler
+    window.gameInstance = 
     new Game();
+});
 });
