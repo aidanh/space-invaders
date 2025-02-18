@@ -24,15 +24,9 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         
-        // Set canvas size based on device
-        if (this.isMobile) {
-            const aspectRatio = 4/3;
-            this.canvas.width = Math.min(window.innerWidth, window.innerHeight * aspectRatio);
-            this.canvas.height = this.canvas.width / aspectRatio;
-        } else {
-            this.canvas.width = 800;
-            this.canvas.height = 600;
-        }
+        this.resizeCanvas();
+        window.addEventListener('resize', () => this.resizeCanvas());
+        window.addEventListener('orientationchange', () => this.resizeCanvas());
         
         this.player = new Player(this.canvas.width / 2, this.canvas.height - 30);
         this.bullets = [];
@@ -457,6 +451,34 @@ class Game {
         document.getElementById('livesValue').textContent = this.lives;
     }
     
+    resizeCanvas() {
+        const aspectRatio = 4/3;
+        this.isMobile = window.innerWidth <= 768;
+
+        if (this.isMobile) {
+            // On mobile, make the game take up most of the screen while maintaining aspect ratio
+            const maxWidth = window.innerWidth * 0.95;
+            const maxHeight = window.innerHeight * 0.7; // Leave room for controls
+
+            if (maxWidth / aspectRatio <= maxHeight) {
+                this.canvas.width = maxWidth;
+                this.canvas.height = maxWidth / aspectRatio;
+            } else {
+                this.canvas.height = maxHeight;
+                this.canvas.width = maxHeight * aspectRatio;
+            }
+        } else {
+            this.canvas.width = 800;
+            this.canvas.height = 600;
+        }
+
+        // Scale game objects based on canvas size
+        const scale = this.canvas.width / 800; // Base scale on original width
+        this.player.width = 50 * scale;
+        this.player.height = 30 * scale;
+        this.player.speed = 5 * scale;
+    }
+
     gameLoop(timestamp = 0) {
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;

@@ -38,7 +38,8 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
     min-height: 100vh;
     background-color: #000;
@@ -48,6 +49,13 @@ body {
 
 .game-container {
     position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 .start-screen {
@@ -244,6 +252,10 @@ body {
     background-color: #000;
     border-radius: 20px;
     filter: brightness(1.2) contrast(1.1);
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }
 
 .game-info {
@@ -266,26 +278,30 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 80px;
+    height: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 20px;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    box-shadow: 0 -5px 15px rgba(51, 255, 51, 0.2);
 }
 
 .mobile-controls button {
     background: rgba(51, 255, 51, 0.2);
     border: 2px solid #33ff33;
     color: #33ff33;
-    padding: 15px 30px;
-    font-size: 24px;
-    border-radius: 10px;
+    padding: 20px 40px;
+    font-size: 28px;
+    border-radius: 15px;
     touch-action: none;
     font-family: 'Press Start 2P', monospace;
     text-shadow: 0 0 5px #33ff33;
     box-shadow: 0 0 10px rgba(51, 255, 51, 0.4);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-controls button:active {
