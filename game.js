@@ -196,14 +196,66 @@ class Game {
             let lastTapTime = 0;
             
             this.canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // Prevent scrolling
-            };
-            
-            leftButton.addEventListener('touchstart', () => this.keys.left = true);
-            leftButton.addEventListener('touchend', () => this.keys.left = false);
-            rightButton.addEventListener('touchstart', () => this.keys.right = true);
-            rightButton.addEventListener('touchend', () => this.keys.right = false);
-            shootButton.addEventListener('touchstart', () => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                this.touchStartX = touch.clientX;
+
+                // Double tap to shoot
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTapTime;
+                if (tapLength < 300 && tapLength > 0) {
+                    if (!this.keys.space && !this.gameOver) {
+                        this.bullets.push(new Bullet(
+                            this.player.x + this.player.width / 2,
+                            this.player.y,
+                            -1
+                        ));
+                        this.sounds.shoot();
+                    }
+                }
+                lastTapTime = currentTime;
+            });
+
+            this.canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!this.touchStartX) return;
+
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - this.touchStartX;
+                
+                // Update movement based on swipe
+                if (deltaX < -10) {
+                    this.keys.left = true;
+                    this.keys.right = false;
+                } else if (deltaX > 10) {
+                    this.keys.right = true;
+                    this.keys.left = false;
+                }
+                
+                // Update touch start position for continuous movement
+                this.touchStartX = touch.clientX;
+            });
+
+            this.canvas.addEventListener('touchend', () => {
+                this.touchStartX = null;
+                this.keys.left = false;
+                this.keys.right = false;
+            });
+
+            // Prevent default touch actions
+            document.addEventListener('touchmove', (e) => {
+                if (e.target === this.canvas) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
+
+        // Keyboard controls for desktop
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') this.keys.left = true;
+            if (e.key === 'ArrowRight') this.keys.right = true;
+            if (e.key === ' ') {
+                e.preventDefault(); // Prevent page scrolling
                 if (!this.keys.space && !this.gameOver) {
                     this.bullets.push(new Bullet(
                         this.player.x + this.player.width / 2,
@@ -213,36 +265,15 @@ class Game {
                     this.sounds.shoot();
                 }
                 this.keys.space = true;
-            });
-            shootButton.addEventListener('touchend', () => this.keys.space = false);
-            
-            // Prevent default touch behaviors
-            document.addEventListener('touchstart', handleTouchStart, { passive: false });
-            document.addEventListener('touchmove', handleTouchStart, { passive: false });
-        }
-        
-        // Keyboard controls
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') this.keys.left = true;
-            if (e.key === 'ArrowRight') this.keys.right = true;
-            if (e.key === ' ') {
-                if (!this.keys.space && !this.gameOver) {
-                    this.bullets.push(new Bullet(
-                        this.player.x + this.player.width / 2,
-                        this.player.y,
-                        -1 // Moving up
-                    ));
-                    this.sounds.shoot();
-                }
-                this.keys.space = true;
             }
         });
-        
+
         window.addEventListener('keyup', (e) => {
             if (e.key === 'ArrowLeft') this.keys.left = false;
             if (e.key === 'ArrowRight') this.keys.right = false;
             if (e.key === ' ') this.keys.space = false;
         });
+
     }
     
     update(deltaTime) {
