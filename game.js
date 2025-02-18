@@ -626,8 +626,9 @@ class Bullet {
         this.y = y;
         this.width = 4;
         this.height = 15;
-        this.speed = 7;
+        this.speed = 12; // Increased from 7 to 12
         this.direction = direction; // -1 for up, 1 for down
+        this.damage = direction === 1 ? 0.5 : 1; // Alien bullets do less damage
     }
     
     update() {
@@ -684,7 +685,7 @@ class Barrier {
                         y: this.y + row * blockSize,
                         width: blockSize,
                         height: blockSize,
-                        health: 1
+                        health: 2 // Increased initial health
                     });
                 }
             }
@@ -699,7 +700,7 @@ class Barrier {
                 bullet.x + bullet.width > block.x &&
                 bullet.y < block.y + block.height &&
                 bullet.y + bullet.height > block.y) {
-                block.health--;
+                block.health -= bullet.damage;
                 if (block.health <= 0) {
                     this.blocks.splice(i, 1);
                 }
@@ -711,9 +712,29 @@ class Barrier {
 
     draw(ctx) {
         this.blocks.forEach(block => {
-            const alpha = block.health;
-            ctx.fillStyle = `rgba(51, 255, 51, ${alpha})`;
+            // Calculate damage percentage
+            const damagePercent = block.health / 2; // 2 is max health
+            
+            // Create gradient based on damage
+            const gradient = ctx.createLinearGradient(
+                block.x, block.y,
+                block.x, block.y + block.height
+            );
+            
+            // Healthy color is bright green, damaged is darker
+            gradient.addColorStop(0, `rgba(51, 255, 51, ${damagePercent})`);
+            gradient.addColorStop(1, `rgba(20, 100, 20, ${damagePercent})`);
+            
+            ctx.fillStyle = gradient;
             ctx.fillRect(block.x, block.y, block.width, block.height);
+            
+            // Add glow effect for undamaged blocks
+            if (damagePercent > 0.8) {
+                ctx.shadowColor = '#33ff33';
+                ctx.shadowBlur = 5;
+                ctx.fillRect(block.x, block.y, block.width, block.height);
+                ctx.shadowBlur = 0;
+            }
         });
     }
 }
