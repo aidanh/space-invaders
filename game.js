@@ -310,12 +310,54 @@ class Game {
             bullet.update();
             
             // Check collision with player
-            if (this.checkCollision(bullet, this.player)) {
+            if (!this.player.invulnerable && !this.player.isExploding && this.checkCollision(bullet, this.player)) {
                 this.lives--;
                 this.updateLives();
+                
+                // Create explosion particles
+                const particles = [];
+                for (let i = 0; i < 30; i++) {
+                    const angle = (Math.PI * 2 / 30) * i;
+                    const speed = 2 + Math.random() * 3;
+                    particles.push({
+                        x: this.player.x + this.player.width / 2,
+                        y: this.player.y + this.player.height / 2,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: 1.0
+                    });
+                }
+
+                // Hide player temporarily
+                this.player.isExploding = true;
+                this.player.particles = particles;
+                this.player.explosionTime = 0;
+                this.player.invulnerable = true;
+
+                // Play explosion sound
                 this.sounds.explosion();
+
                 if (this.lives <= 0) {
                     this.gameOver = true;
+                } else {
+                    // Reset player position after explosion
+                    setTimeout(() => {
+                        this.player.x = this.canvas.width / 2;
+                        this.player.y = this.canvas.height - 30;
+                        this.player.isExploding = false;
+                        
+                        // Flash effect for invulnerability
+                        let flashes = 0;
+                        const flashInterval = setInterval(() => {
+                            this.player.visible = !this.player.visible;
+                            flashes++;
+                            if (flashes >= 10) {
+                                clearInterval(flashInterval);
+                                this.player.visible = true;
+                                this.player.invulnerable = false;
+                            }
+                        }, 200);
+                    }, 1000);
                 }
                 return false;
             }
@@ -332,9 +374,23 @@ class Game {
             return bullet.y < this.canvas.height;
         });
         
+        // Update explosion particles if player is exploding
+        if (this.player.isExploding) {
+            this.player.particles.forEach(particle => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.life -= deltaTime * 0.001;
+                particle.vx *= 0.99;
+                particle.vy *= 0.99;
+            });
+            this.player.particles = this.player.particles.filter(p => p.life > 0);
+        }
+
         // Update player
-        if (this.keys.left) this.player.moveLeft();
-        if (this.keys.right) this.player.moveRight(this.canvas.width);
+        if (!this.player.isExploding) {
+            if (this.keys.left) this.player.moveLeft();
+            if (this.keys.right) this.player.moveRight(this.canvas.width);
+        }
         
         // Update bullets
         this.bullets = this.bullets.filter(bullet => {
@@ -522,6 +578,11 @@ class Player {
         this.width = 50;
         this.height = 30;
         this.speed = 5;
+        this.isExploding = false;
+        this.particles = [];
+        this.explosionTime = 0;
+        this.invulnerable = false;
+        this.visible = true;
     }
     
     moveLeft() {
@@ -533,7 +594,34 @@ class Player {
     }
     
     draw(ctx) {
+        if (this.isExploding) {
+            // Draw explosion particles
+            ctx.shadowColor = '#33ff33';
+            ctx.shadowBlur = 10;
+            this.particles.forEach(particle => {
+                const alpha = particle.life;
+                ctx.fillStyle = `rgba(51, 255, 51, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Add some smaller particles
+                ctx.fillStyle = `rgba(255, 255, 51, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(particle.x + Math.random() * 4 - 2, 
+                        particle.y + Math.random() * 4 - 2, 
+                        1, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.shadowBlur = 0;
+            return;
+        }
+
+        if (!this.visible) return;
+
         ctx.fillStyle = '#33ff33';
+        ctx.shadowColor = '#33ff33';
+        ctx.shadowBlur = 10;
         
         // Draw ship body
         ctx.beginPath();
@@ -560,6 +648,18 @@ class Player {
         ctx.lineTo(this.x + 20, this.y + this.height + 10);
         ctx.lineTo(this.x + 30, this.y + this.height);
         ctx.fill();
+
+        // Draw shield effect when invulnerable
+        if (this.invulnerable) {
+            ctx.strokeStyle = `rgba(51, 255, 51, ${Math.random() * 0.5 + 0.5})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(this.x + this.width / 2, this.y + this.height / 2, 
+                    this.width * 0.7, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        
+        ctx.shadowBlur = 0;
     }
 }
 
