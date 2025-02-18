@@ -37,66 +37,70 @@
 body {
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    height: 100vh;
     background-color: #000;
     font-family: 'Press Start 2P', monospace;
     overflow: hidden;
-    position: fixed;
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
 }
 
 .game-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-}
-
-.start-screen {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.start-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.95);
     z-index: 1000;
+    cursor: pointer;
 }
 
 .start-game-button {
-    all: unset;
-    display: block;
     padding: 30px 50px;
     font-size: 28px;
-    font-family: 'Press Start 2P', cursive;
+    font-family: 'Press Start 2P', monospace;
     background-color: transparent;
     color: #33ff33;
     border: 4px solid #33ff33;
     text-transform: uppercase;
     cursor: pointer;
-    animation: glow 2s infinite;
     text-shadow: 0 0 10px #33ff33;
-    position: relative;
-    overflow: hidden;
-    pointer-events: auto;
+    box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
+    transition: all 0.2s ease;
+    outline: none;
     -webkit-tap-highlight-color: transparent;
-    touch-action: none;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-appearance: none;
-    appearance: none;
+}
+
+.start-game-button:focus {
+    outline: none;
+    box-shadow: 0 0 30px rgba(51, 255, 51, 0.4);
+}
+
+.start-game-button:active {
+    transform: scale(0.95);
+    background-color: rgba(51, 255, 51, 0.1);
+}
+
+.start-game-button:hover,
+.start-game-button:active {
+    background-color: rgba(51, 255, 51, 0.2);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(51, 255, 51, 0.4);
 }
 
 .start-game-button:active,
@@ -255,10 +259,13 @@ body {
     background-color: #000;
     border-radius: 20px;
     filter: brightness(1.2) contrast(1.1);
-    max-width: 100%;
-    height: auto;
     display: block;
     margin: 0 auto;
+    width: 800px;
+    height: 600px;
+    max-width: 100vw;
+    max-height: 100vh;
+    object-fit: contain;
 }
 
 .game-info {

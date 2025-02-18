@@ -8,16 +8,18 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div id="startScreen" class="start-screen">
+        <button type="button" id="startGameButton" class="start-game-button">START GAME</button>
+    </div>
+    
     <div class="game-container">
-        <div id="startScreen" class="start-screen">
-            <div id="startGameButton" class="start-game-button" role="button" tabindex="0">START GAME</div>
-        </div>
         <canvas id="gameCanvas"></canvas>
         <div class="game-info">
             <div class="score">Score: <span id="scoreValue">0</span></div>
             <div class="lives">Lives: <span id="livesValue">3</span></div>
         </div>
     </div>
+
     <script src="game.js"></script>
 </body>
 </html>

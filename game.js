@@ -1,59 +1,38 @@
 class Game {
     constructor() {
-        this.isMobile = window.innerWidth <= 768;
-        this.soundsInitialized = false;
-        this.gameStarted = false;
-        this.setupSounds();
-        this.paused = true; // Add pause state
-        this.touchStartX = null;
-        this.touchStartY = null;
-        this.initialized = false;
-        // Add click handler to initialize sounds (browser requirement)
-        document.addEventListener('click', () => {
-            if (!this.soundsInitialized) {
-                this.sounds.shoot.play().then(() => {
-                    this.sounds.shoot.pause();
-                    this.sounds.shoot.currentTime = 0;
-                });
-                this.sounds.explosion.play().then(() => {
-                    this.sounds.explosion.pause();
-                    this.sounds.explosion.currentTime = 0;
-                });
-                this.soundsInitialized = true;
-            }
-        }, { once: true });
+        // Initialize canvas
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         
-        this.resizeCanvas();
-        window.addEventListener('resize', () => this.resizeCanvas());
-        window.addEventListener('orientationchange', () => this.resizeCanvas());
-        this.alienDirection = 1;
-        this.alienStepDown = false;
-        this.score = 0;
-        this.lives = 3;
-        this.gameOver = false;
-        this.lastTime = 0;
-        this.alienMoveTimer = 0;
-        this.alienMoveInterval = 1000; // Time between alien movements
-        this.alienShootTimer = 0;
-        this.alienShootInterval = 2500; // Time between alien shots
-        this.alienBullets = [];
-        this.ufo = null;
-        this.ufoTimer = 0;
-        this.ufoInterval = 20000; // UFO appears every 20 seconds
-        this.ufoSound = null;
+        // Game state
+        this.isMobile = window.innerWidth <= 768;
+        this.soundsInitialized = false;
+        this.gameStarted = false;
+        this.paused = true;
+        this.initialized = false;
         
+        // Input state
+        this.touchStartX = null;
+        this.touchStartY = null;
         this.keys = {
             left: false,
             right: false,
             space: false
         };
         
+        // Setup
+        this.resizeCanvas();
         this.setupInputs();
-        this.updateScore();
-        this.updateLives();
-        this.gameLoop();
+        this.setupSounds();
+        this.initGame();
+        
+        // Event listeners
+        window.addEventListener('resize', () => this.resizeCanvas());
+        window.addEventListener('orientationchange', () => this.resizeCanvas());
+        
+        // Start game loop
+        this.boundGameLoop = this.gameLoop.bind(this);
+        requestAnimationFrame(this.boundGameLoop);
     }
     
     createBarriers() {
@@ -654,15 +633,16 @@ class Game {
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
         
-        if (!this.paused) {
+        // Clear the canvas
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        if (this.gameStarted && !this.paused) {
             this.update(deltaTime);
             this.draw();
-        } else {
-            // Draw the paused state
-            this.ctx.fillStyle = '#000';
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
-        requestAnimationFrame(this.gameLoop.bind(this));
+        
+        requestAnimationFrame(this.boundGameLoop);
     }
 }
 
@@ -1036,46 +1016,93 @@ class UFO {
     }
 }
 
-// Start the game when the page loads
-window.addEventListener('load', () => {
-    // Store game instance globally for resize handler
-    window.gameInstance = new Game();
+// Initialize game state
+initGame() {
+    this.alienDirection = 1;
+    this.alienStepDown = false;
+    this.score = 0;
+    this.lives = 3;
+    this.gameOver = false;
+    this.lastTime = 0;
+    this.alienMoveTimer = 0;
+    this.alienMoveInterval = 1000;
+    this.alienShootTimer = 0;
+    this.alienShootInterval = 2500;
+    this.alienBullets = [];
+    this.ufo = null;
+    this.ufoTimer = 0;
+    this.ufoInterval = 20000;
+    this.ufoSound = null;
+    this.updateScore();
+    this.updateLives();
+}
 
+// Initialize game when DOM is ready
+function initializeGame() {
+    // Get required elements
     const startScreen = document.getElementById('startScreen');
     const startButton = document.getElementById('startGameButton');
-
-    // Handle start button interactions
-    const startGame = () => {
-        startScreen.style.display = 'none';
-
-        const game = window.gameInstance;
-        if (!game.initialized) {
+    const canvas = document.getElementById('gameCanvas');
+    
+    if (!startScreen || !startButton || !canvas) {
+        console.error('Required elements not found!');
+        return;
+    }
+    
+    // Create game instance
+    const game = new Game();
+    window.gameInstance = game;
+    
+    // Set canvas dimensions
+    canvas.width = 800;
+    canvas.height = 600;
+    
+    // Handle start button click/touch
+    function handleStart(e) {
+        // Prevent default behavior
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        // Only start if not already started
+        if (!game.gameStarted) {
+            console.log('Starting game...');
+            
+            // Create game objects
             game.player = new Player(game.canvas.width / 2, game.canvas.height - 30);
             game.bullets = [];
             game.barriers = game.createBarriers();
             game.aliens = game.createAliens();
+            
+            // Update game state
+            game.gameStarted = true;
+            game.paused = false;
             game.initialized = true;
+            
+            // Hide start screen
+            startScreen.style.display = 'none';
+            
+            console.log('Game started!');
         }
+    }
+    
+    // Add event listeners
+    startButton.onclick = handleStart;
+    startButton.ontouchstart = handleStart;
+}
 
-        game.gameStarted = true;
-        game.paused = false;
-    };
+// Start initialization
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeGame);
+} else {
+    initializeGame();
+}
 
-    // Handle both click and touch
-    startButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        startGame();
-    });
-
-    startButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        startGame();
-    });
-
-    const game = window.gameInstance;
-
+    // Handle touch events for game controls
     document.addEventListener('touchstart', (e) => {
-        if (!game.gameStarted) return;
+        const game = window.gameInstance;
+        if (!game || !game.gameStarted) return;
         e.preventDefault();
         game.touchStartX = e.touches[0].clientX;
         game.touchStartY = e.touches[0].clientY;
