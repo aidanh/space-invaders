@@ -956,19 +956,10 @@ window.addEventListener('load', () => {
 
     const startScreen = document.getElementById('startScreen');
     const startButton = document.getElementById('startGameButton');
-    const mobileControls = document.querySelector('.mobile-controls');
-
-    // Hide mobile controls initially
-    if (window.innerWidth <= 768) {
-        mobileControls.classList.add('hidden');
-    }
 
     // Handle start button interactions
     const startGame = () => {
         startScreen.style.display = 'none';
-        if (window.innerWidth <= 768) {
-            mobileControls.classList.remove('hidden');
-        }
 
         const game = window.gameInstance;
         if (!game.initialized) {
@@ -990,10 +981,6 @@ window.addEventListener('load', () => {
     });
 
     startButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-    });
-
-    startButton.addEventListener('touchend', (e) => {
         e.preventDefault();
         startGame();
     });
