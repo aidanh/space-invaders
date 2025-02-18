@@ -12,13 +12,22 @@ A modern take on the classic Space Invaders arcade game, featuring retro CRT eff
 - Retro-style pixelated font and graphics
 - Score tracking and lives system
 
+## Play Now
+
+Play the game directly in your browser: [Space Invaders](https://aidanh.github.io/space-invaders/)
+
 ## How to Play
 
-1. Open `index.html` in your web browser
-2. Controls:
-   - Left/Right Arrow Keys: Move ship
-   - Spacebar: Shoot
-3. Gameplay:
+### Desktop Controls
+- Left/Right Arrow Keys: Move ship
+- Spacebar: Shoot
+
+### Mobile Controls
+- Tap: Shoot
+- Swipe Left/Right: Move in that direction
+- Touch and Drag: Smooth movement
+
+## Gameplay
    - Destroy aliens before they reach the bottom
    - Use barriers for protection (they can be destroyed)
    - Watch out for the UFO for bonus points (500 pts)
