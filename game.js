@@ -725,21 +725,21 @@ class UFO {
 
 // Start the game when the page loads
 window.addEventListener('load', () => {
+    const startScreen = document.getElementById('startScreen');
     const startButton = document.getElementById('startGameButton');
-    const gameContainer = document.querySelector('.game-container');
     const mobileControls = document.querySelector('.mobile-controls');
 
-    // Add hidden class to game elements on mobile
+    // Hide mobile controls initially
     if (window.innerWidth <= 768) {
-        gameContainer.classList.add('hidden');
         mobileControls.classList.add('hidden');
     }
 
     // Start button click handler
     startButton.addEventListener('click', () => {
-        startButton.style.display = 'none';
-        gameContainer.classList.remove('hidden');
-        mobileControls.classList.remove('hidden');
+        startScreen.style.display = 'none';
+        if (window.innerWidth <= 768) {
+            mobileControls.classList.remove('hidden');
+        }
         window.gameInstance.gameStarted = true;
     });
 

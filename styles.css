@@ -46,24 +46,59 @@ body {
     overflow: hidden;
 }
 
+.start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
 .start-game-button {
-    display: none; /* Hidden by default */
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     padding: 30px 50px;
     font-size: 28px;
     font-family: 'Press Start 2P', cursive;
-    background-color: #4CAF50;
-    color: white;
-    border: 4px solid #45a049;
-    border-radius: 15px;
-    cursor: pointer;
-    z-index: 1000;
+    background-color: transparent;
+    color: #33ff33;
+    border: 4px solid #33ff33;
     text-transform: uppercase;
-    box-shadow: 0 0 30px rgba(76, 175, 80, 0.7);
-    animation: pulse 2s infinite;
+    cursor: pointer;
+    animation: glow 2s infinite;
+    text-shadow: 0 0 10px #33ff33;
+    position: relative;
+    overflow: hidden;
+}
+
+.start-game-button::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(51, 255, 51, 0.1) 2px,
+        rgba(51, 255, 51, 0.1) 4px
+    );
+    pointer-events: none;
+    animation: scanline 10s linear infinite;
+}
+
+.start-game-button:hover {
+    background-color: rgba(51, 255, 51, 0.1);
+}
+
+.start-game-button:active {
+    transform: scale(0.98);
+    background-color: rgba(51, 255, 51, 0.2);
 }
 
 .start-game-button:active {
@@ -71,10 +106,10 @@ body {
     transform: translate(-50%, -50%) scale(0.98);
 }
 
-@keyframes pulse {
-    0% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.05); }
-    100% { transform: translate(-50%, -50%) scale(1); }
+@keyframes glow {
+    0% { box-shadow: 0 0 5px #33ff33, 0 0 10px #33ff33, 0 0 15px #33ff33; }
+    50% { box-shadow: 0 0 10px #33ff33, 0 0 20px #33ff33, 0 0 30px #33ff33; }
+    100% { box-shadow: 0 0 5px #33ff33, 0 0 10px #33ff33, 0 0 15px #33ff33; }
 }
 
 @media (max-width: 768px) {
