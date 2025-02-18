@@ -4,6 +4,7 @@ class Game {
         this.soundsInitialized = false;
         this.gameStarted = false;
         this.setupSounds();
+        this.paused = true; // Add pause state
         this.touchStartX = null;
         this.touchStartY = null;
         // Add click handler to initialize sounds (browser requirement)
@@ -460,8 +461,14 @@ class Game {
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
         
-        this.update(deltaTime);
-        this.draw();
+        if (!this.paused) {
+            this.update(deltaTime);
+            this.draw();
+        } else {
+            // Draw the paused state
+            this.ctx.fillStyle = '#000';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 }
@@ -744,6 +751,7 @@ window.addEventListener('load', () => {
             mobileControls.classList.remove('hidden');
         }
         window.gameInstance.gameStarted = true;
+        window.gameInstance.paused = false; // Unpause the game when start button is clicked
     });
 
     const game = window.gameInstance;
