@@ -7,6 +7,7 @@ class Game {
         this.paused = true; // Add pause state
         this.touchStartX = null;
         this.touchStartY = null;
+        this.initialized = false;
         // Add click handler to initialize sounds (browser requirement)
         document.addEventListener('click', () => {
             if (!this.soundsInitialized) {
@@ -27,11 +28,6 @@ class Game {
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
         window.addEventListener('orientationchange', () => this.resizeCanvas());
-        
-        this.player = new Player(this.canvas.width / 2, this.canvas.height - 30);
-        this.bullets = [];
-        this.barriers = this.createBarriers();
-        this.aliens = this.createAliens();
         this.alienDirection = 1;
         this.alienStepDown = false;
         this.score = 0;
@@ -474,9 +470,15 @@ class Game {
 
         // Scale game objects based on canvas size
         const scale = this.canvas.width / 800; // Base scale on original width
-        this.player.width = 50 * scale;
-        this.player.height = 30 * scale;
-        this.player.speed = 5 * scale;
+        if (this.player) {
+            this.player.width = 50 * scale;
+            this.player.height = 30 * scale;
+            this.player.speed = 5 * scale;
+        }
+
+        // Clear the canvas
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     gameLoop(timestamp = 0) {
@@ -772,8 +774,18 @@ window.addEventListener('load', () => {
         if (window.innerWidth <= 768) {
             mobileControls.classList.remove('hidden');
         }
-        window.gameInstance.gameStarted = true;
-        window.gameInstance.paused = false;
+
+        const game = window.gameInstance;
+        if (!game.initialized) {
+            game.player = new Player(game.canvas.width / 2, game.canvas.height - 30);
+            game.bullets = [];
+            game.barriers = game.createBarriers();
+            game.aliens = game.createAliens();
+            game.initialized = true;
+        }
+
+        game.gameStarted = true;
+        game.paused = false;
     };
 
     // Handle both click and touch
