@@ -782,7 +782,7 @@ class Bullet {
         this.height = 15;
         this.speed = 12;
         this.direction = direction; // -1 for up, 1 for down
-        this.damage = direction === 1 ? 1.5 : 2; // Increased damage for both player and alien bullets
+        this.damage = direction === 1 ? 3 : 4; // Significantly increased damage for both alien (3) and player (4) bullets
     }
     
     update() {
@@ -839,7 +839,7 @@ class Barrier {
                         y: this.y + row * blockSize,
                         width: blockSize,
                         height: blockSize,
-                        health: 1.5 // Reduced initial health
+                        health: 1 // Minimal initial health for faster destruction
                     });
                 }
             }
@@ -867,7 +867,7 @@ class Barrier {
     draw(ctx) {
         this.blocks.forEach(block => {
             // Calculate damage percentage
-            const damagePercent = block.health / 2; // 2 is max health
+            const damagePercent = block.health / 1; // 1 is max health
             
             // Create gradient based on damage
             const gradient = ctx.createLinearGradient(
