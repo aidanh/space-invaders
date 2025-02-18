@@ -2,6 +2,7 @@ class Game {
     constructor() {
         this.isMobile = window.innerWidth <= 768;
         this.soundsInitialized = false;
+        this.gameStarted = false;
         this.setupSounds();
         this.touchStartX = null;
         this.touchStartY = null;
@@ -724,10 +725,28 @@ class UFO {
 
 // Start the game when the page loads
 window.addEventListener('load', () => {
-    // Prevent default touch behaviors
-        const game = window.gameInstance;
+    const startButton = document.getElementById('startGameButton');
+    const gameContainer = document.querySelector('.game-container');
+    const mobileControls = document.querySelector('.mobile-controls');
+
+    // Add hidden class to game elements on mobile
+    if (window.innerWidth <= 768) {
+        gameContainer.classList.add('hidden');
+        mobileControls.classList.add('hidden');
+    }
+
+    // Start button click handler
+    startButton.addEventListener('click', () => {
+        startButton.style.display = 'none';
+        gameContainer.classList.remove('hidden');
+        mobileControls.classList.remove('hidden');
+        window.gameInstance.gameStarted = true;
+    });
+
+    const game = window.gameInstance;
 
     document.addEventListener('touchstart', (e) => {
+        if (!game.gameStarted) return;
         e.preventDefault();
         game.touchStartX = e.touches[0].clientX;
         game.touchStartY = e.touches[0].clientY;
