@@ -46,6 +46,10 @@ body {
     overflow: hidden;
 }
 
+.game-container {
+    position: relative;
+}
+
 .start-screen {
     position: absolute;
     top: 0;

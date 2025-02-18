@@ -725,6 +725,9 @@ class UFO {
 
 // Start the game when the page loads
 window.addEventListener('load', () => {
+    // Store game instance globally for resize handler
+    window.gameInstance = new Game();
+
     const startScreen = document.getElementById('startScreen');
     const startButton = document.getElementById('startGameButton');
     const mobileControls = document.querySelector('.mobile-controls');
@@ -806,7 +809,5 @@ window.addEventListener('load', () => {
         }
     });
     
-    // Store game instance globally for resize handler
-    window.gameInstance = 
-    new Game();
+    // Handle orientation changes
 });
