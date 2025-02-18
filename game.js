@@ -745,7 +745,8 @@ window.addEventListener('load', () => {
     }
 
     // Start button click handler
-    startButton.addEventListener('click', () => {
+    startButton.addEventListener('click', (e) => {
+        e.preventDefault();
         startScreen.style.display = 'none';
         if (window.innerWidth <= 768) {
             mobileControls.classList.remove('hidden');

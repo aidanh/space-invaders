@@ -64,6 +64,9 @@ body {
 }
 
 .start-game-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     padding: 30px 50px;
     font-size: 28px;
     font-family: 'Press Start 2P', cursive;
@@ -77,12 +80,13 @@ body {
     position: relative;
     overflow: hidden;
     outline: none;
-    transform: translateY(0);
-    transition: transform 0.1s, background-color 0.2s;
+    transform: none;
+    transition: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .start-game-button:active {
-    transform: translateY(2px);
     background-color: rgba(51, 255, 51, 0.2);
 }
 
