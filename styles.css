@@ -52,17 +52,18 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    padding: 20px 40px;
-    font-size: 24px;
+    padding: 30px 50px;
+    font-size: 28px;
     font-family: 'Press Start 2P', cursive;
     background-color: #4CAF50;
     color: white;
-    border: none;
-    border-radius: 10px;
+    border: 4px solid #45a049;
+    border-radius: 15px;
     cursor: pointer;
     z-index: 1000;
     text-transform: uppercase;
-    box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+    box-shadow: 0 0 30px rgba(76, 175, 80, 0.7);
+    animation: pulse 2s infinite;
 }
 
 .start-game-button:active {
@@ -70,9 +71,17 @@ body {
     transform: translate(-50%, -50%) scale(0.98);
 }
 
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.05); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
 @media (max-width: 768px) {
     .start-game-button {
         display: block;
+        width: 80%;
+        max-width: 400px;
     }
 
     .game-container.hidden {
@@ -81,6 +90,43 @@ body {
 
     .mobile-controls.hidden {
         display: none;
+    }
+
+    .game-container {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-controls {
+        position: fixed;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .movement-buttons {
+        display: flex;
+        gap: 40px;
+    }
+
+    .movement-buttons button,
+    #shootButton {
+        font-size: 24px;
+        padding: 20px 40px;
+        background: rgba(51, 255, 51, 0.2);
+        border: 2px solid #33ff33;
+        border-radius: 10px;
+        color: #33ff33;
+        min-width: 100px;
     }
 }
 
