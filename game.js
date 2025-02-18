@@ -194,15 +194,16 @@ class Game {
         // Touch controls for mobile
         if (this.isMobile) {
             let lastTapTime = 0;
+            let touchStartTime = 0;
             
             this.canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 const touch = e.touches[0];
                 this.touchStartX = touch.clientX;
+                touchStartTime = new Date().getTime();
 
-                // Double tap to shoot
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTapTime;
+                // Check for double tap
+                const tapLength = touchStartTime - lastTapTime;
                 if (tapLength < 300 && tapLength > 0) {
                     if (!this.keys.space && !this.gameOver) {
                         this.bullets.push(new Bullet(
@@ -213,7 +214,7 @@ class Game {
                         this.sounds.shoot();
                     }
                 }
-                lastTapTime = currentTime;
+                lastTapTime = touchStartTime;
             });
 
             this.canvas.addEventListener('touchmove', (e) => {
@@ -221,33 +222,52 @@ class Game {
                 if (!this.touchStartX) return;
 
                 const touch = e.touches[0];
-                const deltaX = touch.clientX - this.touchStartX;
+                const currentX = touch.clientX;
+                const deltaX = currentX - this.touchStartX;
                 
-                // Update movement based on swipe
-                if (deltaX < -10) {
+                // More responsive movement thresholds
+                if (deltaX < -5) {
                     this.keys.left = true;
                     this.keys.right = false;
-                } else if (deltaX > 10) {
+                } else if (deltaX > 5) {
                     this.keys.right = true;
                     this.keys.left = false;
+                } else {
+                    this.keys.left = false;
+                    this.keys.right = false;
                 }
                 
-                // Update touch start position for continuous movement
-                this.touchStartX = touch.clientX;
+                // Update reference position for next move
+                this.touchStartX = currentX;
             });
 
-            this.canvas.addEventListener('touchend', () => {
+            this.canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const touchEndTime = new Date().getTime();
+                const touchDuration = touchEndTime - touchStartTime;
+
+                // Reset movement state
                 this.touchStartX = null;
                 this.keys.left = false;
                 this.keys.right = false;
+
+                // Single tap for shooting (if not a long press)
+                if (touchDuration < 200) {
+                    if (!this.keys.space && !this.gameOver) {
+                        this.bullets.push(new Bullet(
+                            this.player.x + this.player.width / 2,
+                            this.player.y,
+                            -1
+                        ));
+                        this.sounds.shoot();
+                    }
+                }
             });
 
-            // Prevent default touch actions
-            document.addEventListener('touchmove', (e) => {
-                if (e.target === this.canvas) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
+            // Prevent all default touch actions on the canvas
+            this.canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+            this.canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+            this.canvas.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
         }
 
         // Keyboard controls for desktop
